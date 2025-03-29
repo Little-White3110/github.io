@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>大学生价值观分析系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 引入得意黑字体 -->
+    <style>
+
+<!--//添加MD3标准色域   已被注释-->
+<!--        :root {-->
+<!--    /* MD3核心色 */-->
+<!--    &#45;&#45;md-primary: #6750A4;-->
+<!--    &#45;&#45;md-primary-container: #EADDFF;-->
+<!--    &#45;&#45;md-secondary: #958DA5;-->
+<!--    &#45;&#45;md-secondary-container: #E8DEF8;-->
+<!--    &#45;&#45;md-tertiary: #B58392;-->
+<!--    &#45;&#45;md-tertiary-container: #FFD8E4;-->
+
+<!--    /* 中性色 */-->
+<!--    &#45;&#45;md-surface: #FFFBFE;-->
+<!--    &#45;&#45;md-background: #F3EDF7;-->
+<!--    &#45;&#45;md-error: #B3261E;-->
+<!--}-->
+
+
+        @font-face {
+            font-family: '得意黑';
+            src: url('https://cdn.jsdelivr.net/gh/wordshub/free-font/SmileySans-Oblique.ttf') format('truetype');
+            font-display: swap;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f7fa;
+        }
+
+        /* 毛玻璃顶栏 */
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            border-radius: 0 0 12px 12px;
+            padding: 12px 5%; /* 左右留白5% */
+        }
+
+    .header-content {
+        max-width: 1400px; /* 限制最大宽度 */
+        margin: 0 auto; /* 居中显示 */
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left; /* 文字左对齐 */
+    }
+
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-wrap: wrap;
+    }
+    .header-title {
+        width: 100%;
+        padding: 0 0 10px 10px;
+    }
+}
+
+
+@media (max-width: 480px) {
+    #mode-selector {
+        min-width: 180px;
+    }
+}
+
+
+        h1 {
+            font-family: "得意黑", sans-serif;
+            font-size: 2.2em;
+            color: #333;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .chart-title {
+            font-family: "得意黑", sans-serif;
+            font-size: 1.5em;
+            padding: 15px 20px;
+            background: linear-gradient(90deg, #f8f9fa, white);
+            border-bottom: 1px solid #eee;
+        }
+
+        .chart-container {
+            height: 400px;
+            padding: 15px;
+        }
+
+        #mode-selector {
+            display: block;
+            width: 300px;
+            margin: 15px auto;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+<style>
+/* 卡片动画 */
+.chart-card {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 折叠按钮动画 */
+    .collapse-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 修改这里 */
+        z-index: 10;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+/* 图表容器动画 */
+.chart-container {
+    height: 400px;
+    transition:
+        height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+/* 折叠状态 */
+.chart-card.collapsed .chart-container {
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+
+
+
+</style>
+
+    <!-- 毛玻璃顶栏 -->
+    <div class="header">
+        <div class="header-content">
+            <h1>大学生价值观分析系统</h1>
+            <select id="mode-selector">
+                <option value="">-- 请选择上课方式 --</option>
+            </select>
+        </div>
+    </div>
+
+        <div class="chart-card">
+        <div class="chart-title">
+            学习模式分布
+            <span class="collapse-btn">▼</span>
+        </div>
+        <div class="chart-container">
+            <div id="learning-chart" style="height:400px"></div>
+        </div>
+    </div>
+
+
+        <div class="chart-card">
+            <div class="chart-title">周末活动TOP20</div>
+            <div id="activity-chart" class="chart-container"></div>
+        </div>
+
+
+
+        <div class="chart-card">
+            <div class="chart-title">
+                冲突选择分布
+                <span class="collapse-btn">▼</span>
+            </div>
+            <div class="chart-container">
+                <div id="conflict-chart" style="height:400px"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script>
+// 优先定义颜色函数（在图表初始化之前）
+const md3Colors = [
+    '#6750A4', // Primary
+    '#958DA5', // Secondary
+    '#B58392', // Tertiary
+    '#7D5260', // On Surface
+    '#006C4C', // Success
+    '#00639C'  // Info
+];
+
+function getMd3Color(index) {
+    return md3Colors[index % md3Colors.length];
+}
+
+
+
+
+
+
+
+
+        // 初始化图表
+        const charts = {
+            learning: echarts.init(document.getElementById('learning-chart')),
+            activity: echarts.init(document.getElementById('activity-chart')),
+            conflict: echarts.init(document.getElementById('conflict-chart'))
+        };
+
+        // 加载上课方式
+        fetch('/api/modules')
+            .then(res => res.json())
+            .then(modes => {
+                const selector = document.getElementById('mode-selector');
+                modes.forEach(mode => {
+                    const option = document.createElement('option');
+                    option.value = mode;
+                    option.textContent = mode;
+                    selector.appendChild(option);
+                });
+            });
+
+        // 更新图表函数
+        function updateCharts(mode) {
+            if (!mode) return;
+
+            fetch(`/api/analysis/${mode}`)
+                .then(res => res.json())
+                .then(data => {
+                    // 学习模式饼图
+                    charts.learning.setOption({
+                        tooltip: { trigger: 'item' },
+                        series: [{
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            data: Object.entries(data.学习模式).map(([name, value]) => ({
+                                name, value,
+                                itemStyle: { color: getMd3Color() }
+                            })),
+                            label: {
+                                fontFamily: 'Microsoft YaHei'
+                            }
+                        }]
+                    });
+
+                    // 周末活动词云（修正版）
+                    charts.activity.setOption({
+                        series: [{
+                            type: 'wordCloud',
+                            shape: 'circle',
+                            sizeRange: [20, 80],
+                            rotationRange: [0, 0],
+                            gridSize: 8,
+                            textStyle: {
+                                fontFamily: 'Microsoft YaHei',
+                                color: getMd3Color
+                            },
+                            data: Object.entries(data.周末活动).map(([name, value]) => ({
+                                name,
+                                value,
+                                textStyle: {
+                                    fontFamily: 'Microsoft YaHei'
+                                }
+                            }))
+                        }]
+                    });
+
+                    // 冲突选择柱状图
+                    charts.conflict.setOption({
+                        xAxis: {
+                            type: 'category',
+                            data: Object.keys(data.冲突选择),
+                            axisLabel: {
+                                fontFamily: 'Microsoft YaHei'
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            axisLabel: {
+                                fontFamily: 'Microsoft YaHei'
+                            }
+                        },
+                        series: [{
+                            type: 'bar',
+                            data: Object.values(data.冲突选择),
+                            itemStyle: { color: '#5470c6' },
+                            label: {
+                                show: true,
+                                position: 'top',
+                                fontFamily: 'Microsoft YaHei'
+                            }
+                        }]
+                    });
+                });
+        }
+
+        // 随机颜色生成
+        function getRandomColor() {
+            return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+        }
+
+
+        // 事件监听
+        document.getElementById('mode-selector').addEventListener('change', function() {
+            updateCharts(this.value);
+        });
+
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            Object.values(charts).forEach(chart => chart.resize());
+        });
+    </script>
+
+    <script>
+    // 添加折叠功能
+    document.querySelectorAll('.collapse-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const card = this.closest('.chart-card');
+            card.classList.toggle('collapsed');
+
+
+            // 重新调整图表尺寸
+            setTimeout(() => {
+                const chartId = card.querySelector('.chart-container > div').id;
+                charts[chartId.split('-')[0]].resize();
+            }, 300);
+        });
+    });
+        //添加动画状态提示
+        btn.addEventListener('click', function() {
+    this.style.pointerEvents = 'none'; // 防止重复点击
+    setTimeout(() => this.style.pointerEvents = 'auto', 300);
+});
+    </script>
+</body>
+</html>
